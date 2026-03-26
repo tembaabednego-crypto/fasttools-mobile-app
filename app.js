@@ -14,9 +14,11 @@ const brandLogoNode = document.getElementById("brandLogo");
 const brandCopyrightNode = document.getElementById("brandCopyright");
 const themeColorMeta = document.getElementById("themeColorMeta");
 const appDescriptionMeta = document.getElementById("appDescriptionMeta");
-const API_BASE_RAW = (window.FASTTOOLS_API_BASE || "").trim();
-const API_BASE = API_BASE_RAW.replace(/\/$/, "");
-const BACKEND_ENABLED = API_BASE.length > 0;
+const API_BASE = (window.FasttoolsApi && window.FasttoolsApi.base) || "";
+const BACKEND_ENABLED =
+  window.FasttoolsApi && typeof window.FasttoolsApi.backendEnabled === "function"
+    ? window.FasttoolsApi.backendEnabled()
+    : API_BASE.length > 0;
 const SENTRY_DSN = window.FASTTOOLS_SENTRY_DSN || "";
 const GA_MEASUREMENT_ID = window.FASTTOOLS_GA_MEASUREMENT_ID || "";
 
@@ -106,7 +108,7 @@ async function trackEvent(eventName, payload = {}) {
   }
   if (!BACKEND_ENABLED) return;
   try {
-    await fetch(`${API_BASE}/api/track`, {
+    await window.FasttoolsApi.request("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ eventName, payload })
@@ -120,7 +122,7 @@ async function reportClientError(error, context = {}) {
   }
   if (!BACKEND_ENABLED) return;
   try {
-    await fetch(`${API_BASE}/api/client-error`, {
+    await window.FasttoolsApi.request("/api/client-error", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -172,6 +174,12 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
+function getErrorMessage(error, fallback) {
+  const msg = (error && error.message ? String(error.message) : "").trim();
+  if (msg) return msg;
+  return fallback;
+}
+
 convertBtn.addEventListener("click", async () => {
   if (!fileInput.files || fileInput.files.length === 0) {
     showToast("Please choose a file first.");
@@ -194,14 +202,10 @@ convertBtn.addEventListener("click", async () => {
   try {
     convertBtn.disabled = true;
     convertBtn.textContent = "Converting...";
-    const response = await fetch(`${API_BASE}/api/convert`, {
+    const response = await window.FasttoolsApi.request("/api/convert", {
       method: "POST",
       body: formData
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Conversion failed: ${errorText}`);
-    }
     const blob = await response.blob();
     const extensionMap = {
       pdf_to_word: "docx",
@@ -214,7 +218,8 @@ convertBtn.addEventListener("click", async () => {
     showToast("Conversion complete. Download started.");
     await trackEvent("convert_clicked", { tool, fileName: file.name });
   } catch (error) {
-    showToast("Conversion error. Please try again.");
+    console.error("[convert] Failed", { tool, error });
+    showToast(getErrorMessage(error, "Conversion error. Please try again."));
     await reportClientError(error, { tool });
   } finally {
     convertBtn.disabled = false;
@@ -235,19 +240,17 @@ subscribeForm.addEventListener("submit", async (event) => {
   }
 
   try {
-    const response = await fetch(`${API_BASE}/api/subscribe`, {
+    await window.FasttoolsApi.request("/api/subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: emailInput.value.trim() })
     });
-    if (!response.ok) {
-      throw new Error("Subscription request failed.");
-    }
     await trackEvent("newsletter_subscribe", { email: emailInput.value.trim() });
     showToast("Subscribed successfully!");
     subscribeForm.reset();
   } catch (error) {
-    showToast("Subscribe failed. Try again.");
+    console.error("[subscribe] Failed", { error });
+    showToast(getErrorMessage(error, "Subscribe failed. Try again."));
     await reportClientError(error, { source: "subscribe_form" });
   }
 });
