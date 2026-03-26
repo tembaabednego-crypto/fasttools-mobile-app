@@ -1,0 +1,13 @@
+{
+  "appId": "com.freemultitool.app",
+  "appName": "Free Multi-Tool",
+  "webDir": ".",
+  "server": {
+    "cleartext": true
+  },
+  "plugins": {
+    "AdMob": {
+      "initializeForTesting": false
+    }
+  }
+}

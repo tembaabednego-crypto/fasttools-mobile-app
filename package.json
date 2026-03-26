@@ -1,0 +1,19 @@
+{
+  "name": "fasttools-mobile-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FastTools mobile app with PWA + backend + capacitor wrapper",
+  "scripts": {
+    "cap:init": "npx cap init FastTools com.fasttools.app",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npx cap open android",
+    "cap:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/cli": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor-community/admob": "latest"
+  }
+}

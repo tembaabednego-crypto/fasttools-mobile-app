@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+aiofiles
+requests
+pillow
+pydub
+sentry-sdk
+python-dotenv
