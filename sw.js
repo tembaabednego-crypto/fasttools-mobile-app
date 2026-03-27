@@ -1,3 +1,4 @@
+// Cache version for service worker assets.
 const CACHE_NAME = "fasttools-v2";
 const ASSETS = [
   "./",
