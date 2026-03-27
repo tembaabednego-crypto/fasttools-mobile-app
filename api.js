@@ -1,6 +1,6 @@
 // Centralized backend URL + request helpers (no build step required).
 (function initFasttoolsApi() {
-  const BASE_URL = (window.BASE_URL || "https://fasttools.onrender.com").toString().replace(/\/$/, "");
+  const BASE_URL = "https://fasttools.onrender.com";
 
   function backendEnabled() {
     return BASE_URL.length > 0;

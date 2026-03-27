@@ -202,7 +202,7 @@ convertBtn.addEventListener("click", async () => {
   try {
     convertBtn.disabled = true;
     convertBtn.textContent = "Converting...";
-    const response = await window.FasttoolsApi.request("convert", {
+    const response = await window.FasttoolsApi.request("api/convert", {
       method: "POST",
       body: formData
     });
@@ -260,9 +260,6 @@ window.addEventListener("load", () => {
   initSentry();
   initAds();
   trackEvent("page_view", { page: "home" });
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
-  }
 });
 
 window.addEventListener("error", (event) => {
