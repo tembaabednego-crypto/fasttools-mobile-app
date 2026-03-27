@@ -1,18 +1,17 @@
 // Centralized backend URL + request helpers (no build step required).
 (function initFasttoolsApi() {
-  const DEFAULT_API_BASE = "https://free-multi-tools-backend.onrender.com";
-  const raw = (window.FASTTOOLS_API_BASE || DEFAULT_API_BASE).toString().trim();
-  const base = raw.replace(/\/$/, "");
+  const BASE_URL = "https://fasttools.onrender.com";
+  const base = BASE_URL;
 
   function backendEnabled() {
     return base.length > 0;
   }
 
-  function joinUrl(path) {
-    if (!path) return base;
-    if (path.startsWith("http://") || path.startsWith("https://")) return path;
-    if (!path.startsWith("/")) return `${base}/${path}`;
-    return `${base}${path}`;
+  function buildApiUrl(path) {
+    const normalized = (path || "").toString().replace(/^\/+/, "");
+    if (!normalized) return `${base}/api`;
+    if (normalized.startsWith("api/")) return `${base}/${normalized}`;
+    return `${base}/api/${normalized}`;
   }
 
   async function readErrorBody(response) {
@@ -40,7 +39,7 @@
       throw new Error("Backend not configured.");
     }
 
-    const url = joinUrl(path);
+    const url = buildApiUrl(path);
     let res;
     try {
       res = await fetch(url, options);
@@ -59,9 +58,10 @@
   }
 
   window.FasttoolsApi = Object.freeze({
+    BASE_URL: base,
     base,
     backendEnabled,
-    joinUrl,
+    buildApiUrl,
     request
   });
 })();

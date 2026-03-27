@@ -1,6 +1,6 @@
 // Leave blank for static-host launches (GitHub Pages/Netlify/Vercel).
 // If you set this to a real backend URL, conversion + newsletter will work.
-window.FASTTOOLS_API_BASE = "https://tembaabednego-project.onrender.com";
+window.FASTTOOLS_API_BASE = "https://fasttools.onrender.com";
 window.FASTTOOLS_SENTRY_DSN = "";
 window.FASTTOOLS_GA_MEASUREMENT_ID = "";
 

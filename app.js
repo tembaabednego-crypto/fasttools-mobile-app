@@ -108,7 +108,7 @@ async function trackEvent(eventName, payload = {}) {
   }
   if (!BACKEND_ENABLED) return;
   try {
-    await window.FasttoolsApi.request("/api/track", {
+    await window.FasttoolsApi.request("track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ eventName, payload })
@@ -122,7 +122,7 @@ async function reportClientError(error, context = {}) {
   }
   if (!BACKEND_ENABLED) return;
   try {
-    await window.FasttoolsApi.request("/api/client-error", {
+    await window.FasttoolsApi.request("client-error", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -202,7 +202,7 @@ convertBtn.addEventListener("click", async () => {
   try {
     convertBtn.disabled = true;
     convertBtn.textContent = "Converting...";
-    const response = await window.FasttoolsApi.request("/api/convert", {
+    const response = await window.FasttoolsApi.request("convert", {
       method: "POST",
       body: formData
     });
@@ -240,7 +240,7 @@ subscribeForm.addEventListener("submit", async (event) => {
   }
 
   try {
-    await window.FasttoolsApi.request("/api/subscribe", {
+    await window.FasttoolsApi.request("subscribe", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: emailInput.value.trim() })
