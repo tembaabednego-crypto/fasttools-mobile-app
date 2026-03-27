@@ -1,3 +1,4 @@
+// fix api blocking v2
 // service worker updated
 // Cache only static frontend assets.
 const CACHE_NAME = "fasttools-v3";
