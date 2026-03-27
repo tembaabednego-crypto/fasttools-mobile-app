@@ -1,3 +1,4 @@
+// service worker updated
 // Cache only static frontend assets.
 const CACHE_NAME = "fasttools-v3";
 const BACKEND_ORIGIN = "https://fasttools.onrender.com";
