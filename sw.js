@@ -1,17 +1,18 @@
-// Cache version for service worker assets.
-const CACHE_NAME = "fasttools-v2";
+// Cache only static frontend assets.
+const CACHE_NAME = "fasttools-v3";
+const BACKEND_ORIGIN = "https://fasttools.onrender.com";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./config.js",
   "./api.js",
-  "./app.js",
-  "./manifest.json"
+  "./app.js"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -27,45 +28,37 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
+  event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
-  const sameOrigin = url.origin === self.location.origin;
-  const isHtml =
-    req.mode === "navigate" ||
-    (req.headers.get("accept") || "").includes("text/html") ||
-    url.pathname.endsWith(".html");
-  const isStaticCode =
-    url.pathname.endsWith(".js") || url.pathname.endsWith(".css") || url.pathname.endsWith(".json");
+  const isSameOrigin = url.origin === self.location.origin;
+  const isBackendRequest = url.origin === BACKEND_ORIGIN;
+  const isApiPath = url.pathname.startsWith("/api/");
+  const isPost = req.method === "POST";
 
-  // Never interfere with cross-origin requests (e.g., API calls to Render).
-  if (!sameOrigin) return;
+  // Always bypass POST, backend, and API requests.
+  if (isPost || isBackendRequest || isApiPath || !isSameOrigin) {
+    event.respondWith(fetch(req));
+    return;
+  }
+
+  const cacheablePaths = new Set(["/", "/index.html", "/styles.css", "/config.js", "/api.js", "/app.js"]);
+  if (!cacheablePaths.has(url.pathname)) {
+    event.respondWith(fetch(req));
+    return;
+  }
 
   event.respondWith(
-    (async () => {
-      // Network-first for HTML/JS/CSS so deploys update immediately.
-      if (isHtml || isStaticCode) {
-        try {
-          const fresh = await fetch(req);
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(req, fresh.clone());
-          return fresh;
-        } catch (_) {
-          const cached = await caches.match(req);
-          if (cached) return cached;
-          return fetch(req);
-        }
-      }
-
-      // Cache-first for other same-origin assets.
-      const cached = await caches.match(req);
+    caches.match(req).then((cached) => {
       if (cached) return cached;
-      const fresh = await fetch(req);
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(req, fresh.clone());
-      return fresh;
-    })()
+      return fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+        return res;
+      });
+    })
   );
 });
