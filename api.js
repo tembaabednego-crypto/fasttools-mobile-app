@@ -1,17 +1,16 @@
 // Centralized backend URL + request helpers (no build step required).
 (function initFasttoolsApi() {
-  const BASE_URL = "https://fasttools.onrender.com";
-  const base = BASE_URL;
+  const BASE_URL = (window.BASE_URL || "https://fasttools.onrender.com").toString().replace(/\/$/, "");
 
   function backendEnabled() {
-    return base.length > 0;
+    return BASE_URL.length > 0;
   }
 
   function buildApiUrl(path) {
     const normalized = (path || "").toString().replace(/^\/+/, "");
-    if (!normalized) return `${base}/api`;
-    if (normalized.startsWith("api/")) return `${base}/${normalized}`;
-    return `${base}/api/${normalized}`;
+    if (!normalized) return `${BASE_URL}/api`;
+    if (normalized.startsWith("api/")) return `${BASE_URL}/${normalized}`;
+    return `${BASE_URL}/api/${normalized}`;
   }
 
   async function readErrorBody(response) {
@@ -58,8 +57,8 @@
   }
 
   window.FasttoolsApi = Object.freeze({
-    BASE_URL: base,
-    base,
+    BASE_URL,
+    base: BASE_URL,
     backendEnabled,
     buildApiUrl,
     request
