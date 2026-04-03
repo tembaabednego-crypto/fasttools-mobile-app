@@ -202,7 +202,7 @@ convertBtn.addEventListener("click", async () => {
   try {
     convertBtn.disabled = true;
     convertBtn.textContent = "Converting...";
-    const response = await window.FasttoolsApi.request("api/convert", {
+    const response = await window.FasttoolsApi.request("convert/pdf-to-word", {
       method: "POST",
       body: formData
     });
